@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+instance/
+*.db
+*.mp3
+static/temp_*.mp3
+test_*.py
+test_input.txt
+coding_interview_question_bank.csv
