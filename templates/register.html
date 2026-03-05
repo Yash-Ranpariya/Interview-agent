@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIVA - Register New Account</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .auth-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .brand-icon {
+            font-size: 2.5rem;
+            color: var(--success);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .auth-header h2 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-header p {
+            color: var(--text-dim);
+            margin-bottom: 2.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .input-icon-wrapper {
+            position: relative;
+        }
+
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+        }
+
+        .input-icon-wrapper input {
+            padding-left: 2.8rem;
+        }
+
+        .register-btn {
+            width: 100%;
+            justify-content: center;
+            font-size: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--success), #059669);
+        }
+
+        .login-prompt {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .login-prompt a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .flash-msg {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-wrapper">
+        <div class="glass-panel auth-card">
+            <div class="brand-icon">
+                <i class="fas fa-microchip"></i>
+            </div>
+            <div class="auth-header">
+                <h2>Create Instance</h2>
+                <p>Register your company and start interviewing</p>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="flash-msg">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('register') }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Company Display Name</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-building"></i>
+                            <input type="text" name="company_name" class="glass-input"
+                                placeholder="e.g. Acme Innovations" required autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>System Username</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-terminal"></i>
+                            <input type="text" name="username" class="glass-input" placeholder="Letters/numbers only"
+                                required autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Master Password</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-key"></i>
+                            <input type="password" name="password" class="glass-input" placeholder="••••••••" required>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="glass-btn register-btn">
+                    <span>Initialize Account</span>
+                    <i class="fas fa-shield-alt"></i>
+                </button>
+            </form>
+
+            <div class="login-prompt">
+                Already have an account? <a href="{{ url_for('login') }}">Secure Login</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

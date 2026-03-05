@@ -1,0 +1,9 @@
+flask
+flask-cors
+flask-sqlalchemy
+flask-login
+google-genai
+python-dotenv
+gtts
+requests
+werkzeug

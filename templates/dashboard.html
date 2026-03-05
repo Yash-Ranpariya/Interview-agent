@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIVA - Enterprise Command Center</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            border-right: 1px solid var(--border);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            padding: 0 1rem;
+        }
+
+        .sidebar-brand i {
+            color: var(--accent);
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-item.active a {
+            background: var(--bg-glass);
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .nav-item a:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2.5rem 3rem;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.4) 0%, transparent 100%);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .company-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .company-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), #1e3a8a);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        /* Dash Grid */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.25rem;
+        }
+
+        /* Table Card */
+        .card-container {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Flash Message */
+        .flash-toast {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 1rem 2rem;
+            border-radius: 100px;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.4s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translate(-50%, -100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .dash-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand brand-font">
+                <i class="fas fa-brain"></i>
+                <span>AIVA<small
+                        style="font-weight:300; font-size:0.5em; vertical-align:top; margin-left:2px;">TM</small></span>
+            </div>
+
+            <nav>
+                <ul class="nav-list">
+                    <li class="nav-item active"><a href="#"><i class="fas fa-th-large"></i> Command Center</a></li>
+                    <li class="nav-item"><a href="#"><i class="fas fa-users"></i> Talent Pool</a></li>
+                    <li class="nav-item"><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                    <li class="nav-item"><a href="#"><i class="fas fa-cog"></i> Instance Settings</a></li>
+                </ul>
+            </nav>
+
+            <div style="margin-top:auto; padding: 1rem;">
+                <a href="{{ url_for('logout') }}" class="glass-btn secondary"
+                    style="width:100%; border-radius:10px; color:var(--danger);">
+                    <i class="fas fa-power-off"></i> Sign Out
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="flash-toast" id="flash-toast">{{ message | safe }}</div>
+            {% endfor %}
+            <script>setTimeout(() => document.getElementById('flash-toast')?.remove(), 5000)</script>
+            {% endif %}
+            {% endwith %}
+
+            <header class="content-header">
+                <div class="company-profile">
+                    <div class="company-logo">{{ current_user.company_name[0] | upper }}</div>
+                    <div>
+                        <h1 class="brand-font" style="font-size:1.5rem;">{{ current_user.company_name }}</h1>
+                        <p style="color:var(--text-dim); font-size:0.8rem;">Enterprise Environment v2.4.0</p>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap: 10px;">
+                    <button class="glass-btn secondary"><i class="fas fa-bell"></i></button>
+                    <button class="glass-btn"><i class="fas fa-plus"></i> New Role</button>
+                </div>
+            </header>
+
+            <!-- Stats Overview -->
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2.5rem;">
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon" style="background:rgba(59,130,246,0.1); color:var(--accent);">
+                        <i class="fas fa-users-viewfinder"></i>
+                    </div>
+                    <div>
+                        <p style="color:var(--text-dim); font-size:0.75rem; text-transform:uppercase;">Candidates</p>
+                        <h3 style="font-size:1.75rem;">{{ total_interviews }}</h3>
+                    </div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon" style="background:rgba(16,185,129,0.1); color:var(--success);">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                    <div>
+                        <p style="color:var(--text-dim); font-size:0.75rem; text-transform:uppercase;">Completed</p>
+                        <h3 style="font-size:1.75rem;">{{ completed_interviews }}</h3>
+                    </div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon" style="background:rgba(245,158,11,0.1); color:var(--warning);">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <p style="color:var(--text-dim); font-size:0.75rem; text-transform:uppercase;">Pending</p>
+                        <h3 style="font-size:1.75rem;">{{ pending_interviews }}</h3>
+                    </div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon" style="background:rgba(239,68,68,0.1); color:var(--danger);">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div>
+                        <p style="color:var(--text-dim); font-size:0.75rem; text-transform:uppercase;">Success Rate</p>
+                        <h3 style="font-size:1.75rem;">{{ (completed_interviews / total_interviews * 100) | round | int
+                            if total_interviews > 0 else 0 }}%</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Intelligence & Personality Training -->
+            <div class="glass-panel card-container" style="margin-bottom: 2.5rem;">
+                <div class="section-header">
+                    <h2 class="brand-font"><i class="fas fa-brain" style="color:var(--accent);"></i> AIVA Prime
+                        Personality Training</h2>
+                    <span class="badge badge-active">Advanced AI Tuning</span>
+                </div>
+                <p style="color:var(--text-dim); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                    Inject custom behavioral patterns into AIVA's neural logic. These instructions will guide how AIVA
+                    evaluates candidates and asks questions specifically for your company.
+                </p>
+                <form method="POST" action="{{ url_for('dashboard') }}">
+                    <input type="hidden" name="update_instructions" value="1">
+                    <div style="display:flex; flex-direction:column; gap:1rem;">
+                        <textarea name="instructions" class="glass-input" rows="3"
+                            placeholder="e.g., 'Focus heavily on problem-solving approach rather than syntax', 'We value security-first thinking', 'Be strict on Python performance optimization'."
+                            style="resize:vertical; min-height:80px;">{{ current_user.custom_instructions or '' }}</textarea>
+                        <button type="submit" class="glass-btn" style="align-self: flex-start; padding: 0.6rem 1.5rem;">
+                            Save Neural Mapping
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="dash-grid">
+                <!-- Left: Candidate Table -->
+                <section>
+                    <div class="section-header">
+                        <h2>Recent Interview Deployments</h2>
+                        <a href="#" style="color:var(--accent); text-decoration:none; font-size:0.85rem;">View
+                            Archive</a>
+                    </div>
+                    <div class="glass-panel card-container">
+                        <table class="premium-table">
+                            <thead>
+                                <tr>
+                                    <th>Candidate</th>
+                                    <th>Assignment</th>
+                                    <th>Status</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for interview in interviews %}
+                                <tr>
+                                    <td>
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <div
+                                                style="width:32px; height:32px; background:var(--bg-glass); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">
+                                                {{ interview.candidate_name[0] }}</div>
+                                            <div>
+                                                <div style="font-weight:600; font-size:0.9rem;">{{
+                                                    interview.candidate_name }}</div>
+                                                <div style="font-size:0.7rem; color:var(--text-dim);">{{
+                                                    interview.candidate_email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight:500; font-size:0.85rem;">{{ interview.role }}</div>
+                                    </td>
+                                    <td>
+                                        {% if interview.status == 'Pending' %}
+                                        <span class="badge badge-pending">Pending</span>
+                                        {% elif interview.status == 'In Progress' %}
+                                        <span class="badge badge-active pulse">Active</span>
+                                        {% elif "Hiring Recommendation**: Selected" in interview.result_report or
+                                        "Selected" in interview.result_report %}
+                                        <span class="badge badge-success">Selected</span>
+                                        {% elif "Hiring Recommendation**: Not Selected" in interview.result_report or
+                                        "Not Selected" in interview.result_report %}
+                                        <span class="badge badge-danger">Not Selected</span>
+                                        {% else %}
+                                        <span class="badge badge-success">Completed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align:right;">
+                                        {% if interview.status != 'Completed' %}
+                                        <button class="glass-btn secondary" style="padding:6px 10px;"
+                                            onclick="copyLink('{{ url_for('interview_page', token=interview.token, _external=True) }}')">
+                                            <i class="fas fa-link"></i>
+                                        </button>
+                                        <a href="mailto:{{ interview.candidate_email }}" class="glass-btn secondary"
+                                            style="padding:6px 10px;">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </a>
+                                        {% else %}
+                                        <button class="glass-btn secondary"
+                                            style="padding:6px 12px; font-size:0.75rem;">Report</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" style="text-align:center; padding: 4rem; color:var(--text-dim);">No
+                                        active deployments found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Right: Create & Chart -->
+                <aside style="display:flex; flex-direction:column; gap:2rem;">
+                    <!-- Create Interview -->
+                    <div class="glass-panel card-container">
+                        <h3 class="brand-font" style="margin-bottom:1.5rem; font-size:1.1rem;">Deploy New Interview</h3>
+                        <form method="POST" action="{{ url_for('dashboard') }}">
+                            <div style="display:flex; flex-direction:column; gap:1.25rem;">
+                                <div>
+                                    <label
+                                        style="display:block; font-size:0.75rem; color:var(--text-dim); margin-bottom:5px;">CANDIDATE
+                                        NAME</label>
+                                    <input type="text" name="candidate_name" class="glass-input"
+                                        placeholder="e.g. John Wick" required>
+                                </div>
+                                <div>
+                                    <label
+                                        style="display:block; font-size:0.75rem; color:var(--text-dim); margin-bottom:5px;">CONTACT
+                                        EMAIL</label>
+                                    <input type="email" name="candidate_email" class="glass-input"
+                                        placeholder="john@example.com" required>
+                                </div>
+                                <div>
+                                    <label
+                                        style="display:block; font-size:0.75rem; color:var(--text-dim); margin-bottom:5px;">TECHNICAL
+                                        ROLE</label>
+                                    <input type="text" name="role" class="glass-input"
+                                        placeholder="Senior Backend Engineer" required>
+                                </div>
+                                <button type="submit" class="glass-btn" style="width:100%; justify-content:center;">
+                                    Initialize deployment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Pipeline Chart -->
+                    <div class="glass-panel card-container" style="text-align:center;">
+                        <h3 class="brand-font" style="margin-bottom:1rem; font-size:1.1rem;">Conversion Pipeline</h3>
+                        <div style="height: 180px; position: relative;">
+                            <canvas id="conversionChart"></canvas>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function copyLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                const toast = document.createElement('div');
+                toast.className = 'flash-toast';
+                toast.innerHTML = '<i class="fas fa-check-circle"></i> Token copy successful';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            });
+        }
+
+        // Initialize Pipeline Chart
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('conversionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Selected', 'Pending', 'Rejected'],
+                    datasets: [{
+                        data: [
+                            parseInt("{{ completed_interviews }}"),
+                            parseInt("{{ pending_interviews }}"),
+                            0 // Future enhancement: track rejections explicitly
+                        ],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

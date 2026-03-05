@@ -1,27 +1,29 @@
-# AIVA: AI Interview Agent Avatar
+# AIVA Prime v2.8: Global Architecture Interviewer
 
-AIVA is a highly professional AI Interview Agent Avatar designed to conduct real-world job interviews using AI/ML adaptive intelligence powered by Gemini.
+AIVA is a production-ready AI Interview Agent that conducts high-stakes technical evaluations using **Human-Logic v2.8**. It moves beyond simple Q&A to simulate a real, non-linear technical discussion.
 
-## Features
-- **Adaptive Difficulty:** Automatically scales question complexity based on candidate performance.
-- **Multilingual/Polyglot:** Supports any programming language and any job role.
-- **Progressive Phases:** Starts with fundamentals, moves to intermediate, advanced, and real-world scenarios.
-- **Interview Feedback:** Provides a final evaluation report at the end.
-- **Voice & Text Ready:** Uses text-to-speech so AIVA can speak to you (optional).
+## 🚀 Key Evolutionary Features
+- **🧠 Deep-Branching Logic (v2.8)**: Uses a CSV question bank as a foundation but generates dynamic follow-up questions based on the candidate's specific architectural choices.
+- **💓 Human Vitality**: Features a "breathing" avatar and a "Neural Aura" glow that reacts to speech and thought processes.
+- **🛡️ Shield Proctoring**: Real-time tab-switching detection, webcam monitoring, and automatic disqualification for integrity violations.
+- **🎙️ Conversational Interleaving**: Candidates can "barge in" (interrupt) the AI, and the AI automatically starts listening after speaking, creating a natural dialogue loop.
+- **🎭 Developer Mock Mode**: A built-in "No-API" mode allowing developers to test voice, proctoring, and UI flows without consuming Gemini credits.
+- **🌍 Polyglot Support**: Native Technical Hindi and Gujarati support for global candidate reach.
 
-## Setup Instructions
+## 🛠️ Setup & Deployment
 
-1. **Clone/Download the repository**
-2. **Install dependencies:**
+1. **Environment Config**:
+   Copy `.env.example` to `.env` and configure your `GEMINI_API_KEY` and Gmail SMTP credentials for automated report delivery.
+
+2. **Installation**:
    ```bash
    pip install -r requirements.txt
    ```
-3. **Set up API Key:**
-   Copy `.env.example` to `.env` and fill in your Gemini API key:
+
+3. **Execution**:
    ```bash
-   cp .env.example .env
+   python app.py
    ```
-4. **Run AIVA:**
-   ```bash
-   python main.py
-   ```
+
+## 📊 Evaluation Workflow
+AIVA tracks candidate confidence via **Sentiment-Aware Calibration**. At the end of every session, a **Command Center Report** is generated, saved to the database, and automatically emailed to both the company and the candidate.
